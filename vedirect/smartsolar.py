@@ -4,6 +4,9 @@ class Smartsolar:
     PARAM_MAP = {
         "BatteryFloatVoltage": ':7F6ED00',
         "BatteryAbsorptionVoltage": ":7F7ED00",
+        # "LifeTotal":":74F10",
+        "SystemTotal":":7DDED00",
+        "UserTotal":":7DCEDDC"
     }
 
     def __init__(self, serialport, timeout):
@@ -16,8 +19,13 @@ class Smartsolar:
         return version
 
     def getParam(self, param):
-        raw_result = self.ve.send_command(self.PARAM_MAP[param]) #rtn ":7F7ED009C09C5"
-        result = raw_result[8:12] # 9C09
+        cmd_str = self.PARAM_MAP[param]
+        raw_result = self.ve.send_command(cmd_str) #rtn ":7F7ED009C09C5"
+
+        if raw_result[0:len(cmd_str)]!=cmd_str:
+            print("Maybe async--------")
+            raw_result = self.ve.send_command(cmd_str)
+        result = raw_result[len(cmd_str):len(raw_result)-2] # 9C09
         ba = bytearray.fromhex(result) #b'\x9c\t'
         ba.reverse()
         val = 0        # final result 0x099C = 2460

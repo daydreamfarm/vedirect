@@ -5,7 +5,7 @@ import serial
 class Vedirect:
 
     def __init__(self, serialport, timeout):
-        self.debug = False
+        self.debug = True
         self.serialport = serialport
         self.ser = serial.Serial(serialport, 19200, timeout=timeout)
         self.header1 = ord('\r') #0x0D
@@ -67,11 +67,13 @@ class Vedirect:
             else:
                 self.bytes_sum = 0
         elif self.state == self.HEX:
-            self.hex_array.append(byte)
             self.bytes_sum = 0
             if byte == self.header2:
                 self.state = self.WAIT_HEADER
                 return self.hex_array
+            else:
+                self.hex_array.append(byte)
+
         else:
             raise AssertionError()
 
@@ -142,9 +144,12 @@ class Vedirect:
         i.append(self.header2)
         self.dump_int_array(i, "Command")
         self.ser.write(i)
-        return "".join(chr(c) for c in self.read_data_single(True))
+
+        raw_res = self.read_data_single(True)
+        return "".join(chr(c) for c in raw_res)
 
         # todo return value checksum veirfication
+        # 所有返回的命令必须跟发出的命令匹配才有意义，否则就是错的
 
     def dump_int_array(self, i, comment):
         if self.debug:
