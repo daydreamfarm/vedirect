@@ -144,6 +144,8 @@ class Vedirect:
         self.ser.write(i)
         return "".join(chr(c) for c in self.read_data_single(True))
 
+        # todo return value checksum veirfication
+
     def dump_int_array(self, i, comment):
         if self.debug:
             print (comment)
