@@ -5,19 +5,21 @@ import serial
 class Vedirect:
 
     def __init__(self, serialport, timeout):
+        self.debug = False
         self.serialport = serialport
         self.ser = serial.Serial(serialport, 19200, timeout=timeout)
         self.header1 = ord('\r') #0x0D
         self.header2 = ord('\n') #0x0A
         self.hexmarker = ord(':') #0x3A
         self.delimiter = ord('\t') #0x09
+
+    def data_init(self):
         self.key = ''
         self.value = ''
         self.bytes_sum = 0;
         self.state = self.WAIT_HEADER
         self.dict = {}
         self.hex_array = []
-
 
     (HEX, WAIT_HEADER, IN_KEY, IN_VALUE, IN_CHECKSUM) = range(5)
 
@@ -76,6 +78,7 @@ class Vedirect:
     # Device will broadcast human readable information every second.
     # Set skip_broadcast to True will skip this info and try to grab hex result only.
     def read_data_single(self, skip_broadcast = False):
+        self.data_init()
         i = []
         broadcast_cnt = 0
         while True:
@@ -84,7 +87,7 @@ class Vedirect:
                 i.append(single_byte)
                 packet = self.input(single_byte)
                 if (packet != None):
-                    if skip_broadcast and i[0]!=':' and broadcast_cnt < 10:
+                    if skip_broadcast and i[0]!=ord(':') and broadcast_cnt < 10:
                         i=[]
                         broadcast_cnt +=1
                     else:
@@ -117,6 +120,11 @@ class Vedirect:
                     i = []
                     callbackFunction(packet)
 
+    # Send hex command to Victron SmartSolar Charge Controller
+    # e.g. send_command(":7F0ED00") = Get Battery maximum current
+    #       return value: ":7F7ED009C09C5"
+    # e.g. send_command(":1") = Ping Device
+    # Please refer for BlueSolar-HEX-protocol-MPPT.pdf for detailed info.
     def send_command(self, cmd):
         i = []
         checksum = 0
@@ -134,21 +142,10 @@ class Vedirect:
         i.append(self.header2)
         self.dump_int_array(i, "Command")
         self.ser.write(i)
-        return self.read_data_single()
+        return "".join(chr(c) for c in self.read_data_single(True))
 
-
-        # self.ser.write([self.hexmarker,ord('7'),ord('F'),ord('7'),ord('E'),ord('D'),ord('0'),ord('0'),ord('6'),ord('A'),self.header2])
     def dump_int_array(self, i, comment):
-        print (comment)
-        print("".join(chr(c) for c in i))
-        print(".".join("{:02x}".format(c) for c in i))
-
-
-
-# \r\nkey\tvalue\rkey\tvalue\r\n
-#
-# :7F0ED0071\n
-#
-# :07F0ED0071\n
-
-# 07F0ED0071\n
+        if self.debug:
+            print (comment)
+            print("".join(chr(c) for c in i))
+            print(".".join("{:02x}".format(c) for c in i))
