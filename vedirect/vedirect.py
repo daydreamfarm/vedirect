@@ -63,7 +63,7 @@ class Vedirect:
         for i in range(10):
             self.ser.write(hex_command)
             raw_res = self.read_frame(self.FRAME_HEX)
-            if raw_res[0]==self.hexmarker:
+            if raw_res and raw_res[0]==self.hexmarker:
                 result =  "".join(chr(c) for c in raw_res)
                 if self.hex_checksum(result) == 0:
                     self.err_msg = ""
@@ -180,15 +180,10 @@ class Vedirect:
     # return ":7F7ED006A" in ASCII int array
     def gen_hex_command(self, cmd):
         hex_command = [self.hexmarker]
-        checksum = 0
-        is_high = False
-
         for c in cmd:
             hex_command.append(ord(c))
-            checksum += int(c,16)* (16 if is_high else 1)
-            is_high = not is_high
 
-        check_result = (0x155 - checksum & 0xFF) & 0xff
+        check_result = self.hex_checksum(cmd)
         for c in "{:02X}".format(check_result):
             hex_command.append(ord(c))
         hex_command.append(self.header2)
