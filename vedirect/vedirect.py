@@ -52,9 +52,44 @@ import serial
 
 
 class Vedirect:
+    # Send hex command to Victron SmartSolar Charge Controller
+    # e.g. send_command("7F0ED00") = Get Battery maximum current
+    #       return value: ":7F7ED009C09C5"
+    # e.g. send_command("1") = Ping Device
+    # Please refer for BlueSolar-HEX-protocol-MPPT.pdf for detailed info.
+    def send_command(self, cmd):
+        hex_command = self.gen_hex_command(cmd)
+        self.dump_int_array(hex_command, "Command")
+        for i in range(10):
+            self.ser.write(hex_command)
+            raw_res = self.read_frame(self.FRAME_HEX)
+            if raw_res[0]==self.hexmarker:
+                result =  "".join(chr(c) for c in raw_res)
+                if self.hex_checksum(result) == 0:
+                    self.err_msg = ""
+                    return result
+        self.err_msg = "No valid response!"
+        return False
+
+        # todo return value checksum veirfication
+        # 所有返回的命令必须跟发出的命令匹配才有意义，否则就是错的
+
+
+    (FRAME_ALL, FRAME_TEXT, FRAME_HEX) = range(3)
+
+    def read_frame(self, frame_type = FRAME_ALL):
+        self.data_init()
+        broadcast_cnt = 0
+        while True:
+            data = self.ser.read()
+            for single_byte in data:
+                packet = self.packet_check(single_byte)
+                if (packet != None):
+                    self.dump_int_array(packet, "Result")
+                    return packet
 
     def __init__(self, serialport, timeout):
-        self.debug = True
+        self.debug = False
         self.serialport = serialport
         self.ser = serial.Serial(serialport, 19200, timeout=timeout)
         self.header1 = ord('\r') #0x0D
@@ -72,10 +107,11 @@ class Vedirect:
 
     (HEX, WAIT_HEADER, IN_KEY, IN_VALUE, IN_CHECKSUM) = range(5)
 
-    def input(self, byte):
+    # Process a single byte. Return packet content at the end of frame, and None
+    # if in a frame.
+    def packet_check(self, byte):
         if byte == self.hexmarker and self.state != self.IN_CHECKSUM:
             self.state = self.HEX
-
 
         if self.state == self.WAIT_HEADER:
             self.bytes_sum += byte
@@ -83,7 +119,6 @@ class Vedirect:
                 self.state = self.WAIT_HEADER
             elif byte == self.header2:
                 self.state = self.IN_KEY
-
             return None
         elif self.state == self.IN_KEY:
             self.bytes_sum += byte
@@ -122,73 +157,58 @@ class Vedirect:
                 return self.hex_array
             else:
                 self.hex_array.append(byte)
-
         else:
             raise AssertionError()
 
-    # Device will broadcast human readable information every second.
-    # bram
 
-    (FRAME_ALL, FRAME_TEXT, FRAME_HEX) = range(3)
+    # def read_data_callback(self, callbackFunction):
+    #     i = []
+    #     while True:
+    #         data = self.ser.read()
+    #         for byte in data:
+    #             i.append(byte)
+    #             packet = self.packet_check(byte)
+    #             if (packet != None):
+    #                 self.dump_int_array(i, "Result")
+    #                 i = []
+    #                 callbackFunction(packet)
 
-    def read_frame(self, frame_type = FRAME_ALL):
-        self.data_init()
-        i = []
-        broadcast_cnt = 0
-        while True:
-            data = self.ser.read()
-            for single_byte in data:
-                i.append(single_byte)
-                packet = self.input(single_byte)
-                if (packet != None):
-                    if frame_type == self.FRAME_HEX and i[0]!=ord(':') and broadcast_cnt < 10:
-                        i=[]
-                        broadcast_cnt +=1
-                    else:
-                        self.dump_int_array(i, "Result")
-                        return packet
 
-    def read_data_callback(self, callbackFunction):
-        i = []
-        while True:
-            data = self.ser.read()
-            for byte in data:
-                i.append(byte)
-                packet = self.input(byte)
-                if (packet != None):
-                    self.dump_int_array(i, "Result")
-                    i = []
-                    callbackFunction(packet)
-
-    # Send hex command to Victron SmartSolar Charge Controller
-    # e.g. send_command(":7F0ED00") = Get Battery maximum current
-    #       return value: ":7F7ED009C09C5"
-    # e.g. send_command(":1") = Ping Device
-    # Please refer for BlueSolar-HEX-protocol-MPPT.pdf for detailed info.
-    def send_command(self, cmd):
-        i = []
+    # Attch leading colon at the beginning of the command and checksum byte and
+    # 0x0A to the end of raw command to create full hex command byte array.
+    # e.g. gen_hex_command("7F7ED00")
+    # return ":7F7ED006A" in ASCII int array
+    def gen_hex_command(self, cmd):
+        hex_command = [self.hexmarker]
         checksum = 0
-        is_high = True
+        is_high = False
 
         for c in cmd:
-            i.append(ord(c))
-            if c!=':':
-                checksum += int(c,16)*16 if is_high else int(c,16)
+            hex_command.append(ord(c))
+            checksum += int(c,16)* (16 if is_high else 1)
             is_high = not is_high
 
         check_result = (0x155 - checksum & 0xFF) & 0xff
         for c in "{:02X}".format(check_result):
-            i.append(ord(c))
-        i.append(self.header2)
-        self.dump_int_array(i, "Command")
-        self.ser.write(i)
+            hex_command.append(ord(c))
+        hex_command.append(self.header2)
+        return hex_command
 
-        raw_res = self.read_frame(self.FRAME_HEX)
-        return "".join(chr(c) for c in raw_res)
+    def hex_checksum(self, cmd):
+        checksum = 0
+        is_high = False
 
-        # todo return value checksum veirfication
-        # 所有返回的命令必须跟发出的命令匹配才有意义，否则就是错的
+        for c in cmd:
+            if ord(c) == self.hexmarker:
+                continue
+            checksum += int(c,16)* (16 if is_high else 1)
+            is_high = not is_high
 
+        check_result = (0x155 - checksum & 0xFF) & 0xff
+        return check_result
+
+
+    # For internal debug use.
     def dump_int_array(self, i, comment):
         if self.debug:
             print (comment)

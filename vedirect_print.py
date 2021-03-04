@@ -15,7 +15,7 @@ if __name__ == '__main__':
     parser.add_argument('--timeout', help='Serial port read timeout', type=int, default='60')
     args = parser.parse_args()
     ve = Vedirect(args.port, args.timeout)
-    print(ve.send_command(':7F7ED00'))
+    print("FINAL RESULT = ",ve.send_command('7F7ED00'))
     # print(ve.read_frame())
     # raw_data = ve.read_data_single()
     # print_data_callback(raw_data)
