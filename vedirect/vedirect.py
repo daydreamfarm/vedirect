@@ -59,24 +59,31 @@ class Vedirect:
     # Please refer for BlueSolar-HEX-protocol-MPPT.pdf for detailed info.
     def send_command(self, cmd):
         hex_command = self.gen_hex_command(cmd)
-        self.dump_int_array(hex_command, "Command")
         for i in range(10):
+            self.dump_int_array(hex_command, "Command")
             self.ser.write(hex_command)
             raw_res = self.read_frame(self.FRAME_HEX)
-            if raw_res and raw_res[0]==self.hexmarker:
-                result =  "".join(chr(c) for c in raw_res)
-                if self.hex_checksum(result) == 0:
-                    self.err_msg = ""
-                    return result
+            if raw_res and raw_res[0]==chr(self.hexmarker) and self.hex_checksum(raw_res) == 0:
+                self.err_msg = ""
+                return raw_res
         self.err_msg = "No valid response!"
         return False
 
         # todo return value checksum veirfication
         # 所有返回的命令必须跟发出的命令匹配才有意义，否则就是错的
 
+    def read_text_frame(self):
+        self.dump_int_array("Read Text Frame", "Command")
+        for i in range(10):
+            result = self.read_frame()
+            if not isinstance(result,str):
+                return result
 
     (FRAME_ALL, FRAME_TEXT, FRAME_HEX) = range(3)
 
+    # return value:
+    # hex frame: string
+    # text frame: object
     def read_frame(self, frame_type = FRAME_ALL):
         self.data_init()
         broadcast_cnt = 0
@@ -85,11 +92,13 @@ class Vedirect:
             for single_byte in data:
                 packet = self.packet_check(single_byte)
                 if (packet != None):
-                    self.dump_int_array(packet, "Result")
+                    self.dump_int_array(packet, "Response")
+                    if isinstance(packet, list):
+                        return "".join(chr(c) for c in packet)
                     return packet
 
-    def __init__(self, serialport, timeout):
-        self.debug = False
+    def __init__(self, serialport, timeout, debug = False):
+        self.debug = debug
         self.serialport = serialport
         self.ser = serial.Serial(serialport, 19200, timeout=timeout)
         self.header1 = ord('\r') #0x0D
@@ -206,6 +215,9 @@ class Vedirect:
     # For internal debug use.
     def dump_int_array(self, i, comment):
         if self.debug:
-            print (comment)
-            print("".join(chr(c) for c in i))
-            print(".".join("{:02x}".format(c) for c in i))
+            print ("=====",comment,"=====")
+            if isinstance(i, list) and type(i[0] is int):
+                print("".join(chr(c) for c in i))
+                # print(".".join("{:02x}".format(c) for c in i))
+            else:
+                print(i)
