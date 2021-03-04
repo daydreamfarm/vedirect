@@ -2,6 +2,7 @@
 
 import serial
 
+
 #
 # There are two type of frame for the VEdirect protocol: text frame and hex frame.
 #
@@ -14,47 +15,15 @@ import serial
 #
 # Hex frame are leaded by colon(":"), anytime the colon appears, the previous
 # frame terminated immediately and switch to the start of a hex frame. The
-# byte 0x0A ('\n') is the end of a hex frame. e.g.:
+# byte 0x0A is the end of a hex frame. e.g.:
 #
 # Beside the leading colon(":"), the whole hex frame are build only by hex
-# characters: '0'-'9','A'-'F'.
+# characters: '0'-'9','A'-'F', and t
 #
-#
-# Command: ping
-# Command string:
-#    ':0154\n'
-# Code:
-#    self.ser.write([self.hexmarker,ord('1'),ord('5'),ord('4'),self.header2])
-# Reponse
-#    3a:35:35:34:34:31:42:42:0a   Raw data
-#    :  5  5  4  4  1  2  2  \n   ASCII string
-# Explaination:
-#  := hex mode,
-#  5 = response of ping
-#  5441 data in little endian format, hex data is 0x4154 = version 1.54
-#
-# Command: get Battery absorption voltage
-# Command String:
-#   ':7F7ED006A\n'
-# Code:
-#   self.ser.write([self.hexmarker,ord('7'),ord('F'),ord('7'),ord('E'),ord('D'),ord('0'),ord('0'),ord('6'),ord('A'),self.header2])
-# Command Explaination:
-#   7 = Get params
-#   F7ED = 0xEDF7 = params: absorption voltage
-#   00 = Flags sub byte, always zero
-#   6A = checksum = 07 + FE + ED + 00 + 6A = 0x255 & 0x55 = 0
-# Response:
-#   3a:37:46:37:45:44:30:30:39:43:30:39:43:35:0a Raw data
-#   :  7  F  7  E  D  0  0  9  C  0  9  C  5  \n ASCII string
-# Data:
-#  data is four bytes (int 16) just follow the command in this case,
-# '9C09' = 0x099C = 2460 = 24.60v
-
-
-class Vedirect:
+class Venew:
 
     def __init__(self, serialport, timeout):
-        self.debug = True
+        self.debug = False
         self.serialport = serialport
         self.ser = serial.Serial(serialport, 19200, timeout=timeout)
         self.header1 = ord('\r') #0x0D
@@ -62,20 +31,20 @@ class Vedirect:
         self.hexmarker = ord(':') #0x3A
         self.delimiter = ord('\t') #0x09
 
-    def data_init(self):
-        self.key = ''
-        self.value = ''
-        self.bytes_sum = 0;
-        self.state = self.WAIT_HEADER
-        self.dict = {}
-        self.hex_array = []
+    (FRAME_ALL, FRAME_TEXT, FRAME_HEX) = range(3)
+
+    def readFrame(self, frameType = FRAME_ALL):
+        while True:
+            b = self.ser.read()
+            print(b, end="      ", flush = True)
+
+
 
     (HEX, WAIT_HEADER, IN_KEY, IN_VALUE, IN_CHECKSUM) = range(5)
 
     def input(self, byte):
         if byte == self.hexmarker and self.state != self.IN_CHECKSUM:
             self.state = self.HEX
-
 
         if self.state == self.WAIT_HEADER:
             self.bytes_sum += byte
@@ -127,11 +96,8 @@ class Vedirect:
             raise AssertionError()
 
     # Device will broadcast human readable information every second.
-    # bram
-
-    (FRAME_ALL, FRAME_TEXT, FRAME_HEX) = range(3)
-
-    def read_frame(self, frame_type = FRAME_ALL):
+    # Set skip_broadcast to True will skip this info and try to grab hex result only.
+    def read_data_single(self, skip_broadcast = False):
         self.data_init()
         i = []
         broadcast_cnt = 0
@@ -141,7 +107,7 @@ class Vedirect:
                 i.append(single_byte)
                 packet = self.input(single_byte)
                 if (packet != None):
-                    if frame_type == self.FRAME_HEX and i[0]!=ord(':') and broadcast_cnt < 10:
+                    if skip_broadcast and i[0]!=ord(':') and broadcast_cnt < 10:
                         i=[]
                         broadcast_cnt +=1
                     else:
@@ -149,6 +115,20 @@ class Vedirect:
                         return packet
 
     def read_data_callback(self, callbackFunction):
+        # command ping
+        #self.ser.write([self.hexmarker,ord('1'),ord('5'),ord('4'),self.header2])
+        # 3a:35:35:34:34:31:42:42:0a   raw data
+        # :  5  5  4  4  1  2  2    conver to asc
+        # :=hex mode, 5 = ping, 5441 is the real data 0x4154 = version 1.54  ?
+
+        # command: get Battery absorption voltage
+        # "7F7ED006A" 7=get, F7ED=0xEDF7 = absorption voltage, 00=always zero, 6A checksum = 07 + FE + ED + 00 + 6A = 0x255
+        # 除了指令是1个字符，其余都是两个字符表示一个0xFF，计算checksum的时候用这种奇怪的拆解进行计算
+        # self.ser.write([self.hexmarker,ord('7'),ord('F'),ord('7'),ord('E'),ord('D'),ord('0'),ord('0'),ord('6'),ord('A'),self.header2])
+        #3a:37:46:37:45:44:30:30:39:43:30:39:43:35:0a raw raw_data
+        # :  7  F  7  E  D  0  0  9  C  0  9  C  5   先转换成字符串，
+        # 0x099C = 2460 = 24.60v   然后获得真正的数据，再decoding。同样的，需要知道这个字符串中对应的字段是 uint8还是uint16
+
         i = []
         while True:
             data = self.ser.read()
@@ -183,7 +163,7 @@ class Vedirect:
         self.dump_int_array(i, "Command")
         self.ser.write(i)
 
-        raw_res = self.read_frame(self.FRAME_HEX)
+        raw_res = self.read_data_single(True)
         return "".join(chr(c) for c in raw_res)
 
         # todo return value checksum veirfication

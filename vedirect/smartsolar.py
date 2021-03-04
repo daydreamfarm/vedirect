@@ -12,11 +12,22 @@ class Smartsolar:
     def __init__(self, serialport, timeout):
         self.ve = Vedirect(serialport, timeout)
 
+    def readText(self):
+        return self.ve.read_data_single()
+
     def pingDevice(self):
         raw_result = self.ve.send_command(":1") #rtn ":7F7ED009C09C5"
         result = raw_result[2:6]
         version = result[3] + "." + result[0:2]
         return version
+
+    def appVersion(self):
+        raw_result = self.ve.send_command(":3") #rtn ":7F7ED009C09C5"
+        return raw_result
+        # result = raw_result[2:6]
+        # version = result[3] + "." + result[0:2]
+        # return version
+
 
     def getParam(self, param):
         cmd_str = self.PARAM_MAP[param]

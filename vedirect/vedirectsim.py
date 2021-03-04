@@ -21,6 +21,13 @@ class Vedirectsim:
                      'ERR': '0', 'CS': '5', 'BMV': '702', 'FW': '1.19',
                      'PID': '0x204', 'SER#': 'HQ141112345', 'HSDS': '0'}
 
+        # This data dump from a Smartsolar MPPT 100|50
+        self.dict2 = {'PID': '0xA057', 'FW': '154', 'SER#': 'HQ18295PH3P',
+                      'V': '22680', 'I': '23400', 'VPV': '61970', 'PPV': '541',
+                      'CS': '3', 'MPPT': '2', 'OR': '0x00000000', 'ERR': '0',
+                      'LOAD': 'ON', 'H19': '18405', 'H20': '221', 'H21': '961',
+                      'H22': '507', 'H23': '958', 'HSDS': '248'}                     
+
     def convert(self, datadict):
         result = list()
         for key in self.dict:
@@ -36,21 +43,19 @@ class Vedirectsim:
         result.append(ord('\t'))
         result.append((256 - (sum(result) % 256)) % 256)
         return result
-                      
 
-        
+
+
     def send_packet(self):
         packet = self.convert(self.dict)
         self.ser.write(bytes(packet))
 
-        
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='A simple VE.Direct simulator')
     parser.add_argument('--port', help='Serial port')
     args = parser.parse_args()
     ve = Vedirectsim(args.port)
     while True:
-        ve.send_packet()
+        print(ve.convert(ve.dict))
         time.sleep(1)
-        
-
