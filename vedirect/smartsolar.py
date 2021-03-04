@@ -1,34 +1,81 @@
 # -*- coding: utf-8 -*-
+from vedirect import Veconst
 from vedirect import Vedirect
+from vedirect import Mpptsim
+
 
 # todo:
 # 1. check if return value match command send.
 
 class Smartsolar:
-    PARAM_MAP = {
-        "BatteryFloatVoltage": ':7F6ED00',
-        "BatteryAbsorptionVoltage": ":7F7ED00",
-        "SystemTotal":":7DDED00",
-        "UserTotal":"7DCEDDC"
-    }
+    # REG_BATTERYSAFE_MODE = 0xEDFF
+    # REG_ADAPTIVE_MODE = 0xEDFE
+    # REG_AUTOMATIC_EQUALISATION_MODE = 0xEDFD
+    # REG_BATTERY_BULK_TIME_LIMIT = 0xEDFC
+    # REG_BATTERY_ABSORPTION_TIME_LIMIT = 0xEDFB
+    # REG_BATTERY_ABSORPTION_VOLTAGE = 0xEDF7
+    # REG_BATTERY_FLOAT_VOLTAGE = 0xEDF6
+    # REG_BATTERY_EQUALISATION_VOLTAGE = 0xEDF4
+    # REG_BATTERY_TEMP_COMPENSATION = 0xEDF2
+    # REG_BATTERY_TYPE = 0xEDF1
+    # REG_BATTERY_MAXIMUM_CURRENT = 0xEDF0
+    # REG_BATTERY_VOLTAGE = 0xEDEF
+    # REG_BATTERY_TEMPERATURE = 0xEDEC
+    # REG_BATTERY_VOLTAGE_SETTING = 0xEDEA
+    # REG_BMS_PRESENT = 0xEDE8
+    # REG_TAIL_CURRENT = 0xEDE7
+    # REG_LOW_TEMPERATURE_CHARGE_CURRENT = 0xEDE6
+    # REG_AUTO_EQUALISE_STOP_ON_VOLTAGE = 0xEDE5
+    # REG_EQUALISATION_CURRENT_LEVEL = 0xEDE4
+    # REG_EQUALISATION_DURATION = 0xEDE3
+    # REG_RE_BULK_VOLTAGE_OFFSET = 0xED2E
+    # REG_BATTERY_LOW_TEMPERATURE_LEVEL = 0xEDE0
+    # REG_VOLTAGE_COMPENSATION = 0xEDCA
+    #
+    # # param_name : [ ID, Scale, Data Lengh, Unit, Description]
+    # REG_PARAMS = {
+    #     REG_BATTERYSAFE_MODE :[0xEDFF, -1, 1, "","Batterysafe mode"],
+    #     REG_ADAPTIVE_MODE : [0xEDFE, -1, 1, "", "Adaptive mode"],
+    #     REG_AUTOMATIC_EQUALISATION_MODE : [0xEDFD, -1, 1, "", "Automatic equalisation mode"],
+    #     REG_BATTERY_BULK_TIME_LIMIT : [0xEDFC, 0.01, 2, "Hours", "Battery bulk time limit"],
+    #     REG_BATTERY_ABSORPTION_TIME_LIMIT : [0xEDFB, 0.01, 2, "Hours", "Battery absorption time limit"],
+    #     REG_BATTERY_ABSORPTION_VOLTAGE : [0xEDF7, 0.01, 2, "V", "Battery absorption voltage"],
+    #     REG_BATTERY_FLOAT_VOLTAGE : [0xEDF6, 0.01, 2, "V", "Battery float voltage"],
+    #     REG_BATTERY_EQUALISATION_VOLTAGE : [0xEDF4, 0.01, 2, "V", "Battery equalisation voltage"],
+    #     REG_BATTERY_TEMP_COMPENSATION : [0xEDF2, 0.01, 2, "mV/K", "Battery temp. compensation"],
+    #     REG_BATTERY_TYPE : [0xEDF1, -1, 1, "", "Battery type"],
+    #     REG_BATTERY_MAXIMUM_CURRENT : [0xEDF0, 0.1, 2, "A", "Battery maximum current"],
+    #     REG_BATTERY_VOLTAGE : [0xEDEF, 1, 1, "V", "Battery voltage"],
+    #     REG_BATTERY_TEMPERATURE : [0xEDEC, 0.01, 2, "K", "Battery temperature"],
+    #     REG_BATTERY_VOLTAGE_SETTING : [0xEDEA, 1, 1, "V", "Battery voltage setting"],
+    #     REG_BMS_PRESENT : [0xEDE8, -1, 1, "", "BMS present"],
+    #     REG_TAIL_CURRENT : [0xEDE7, 0.1, 2, "A", "Tail current"],
+    #     REG_LOW_TEMPERATURE_CHARGE_CURRENT : [0xEDE6, 0.1, 2, "A", "Low temperature charge current"],
+    #     REG_AUTO_EQUALISE_STOP_ON_VOLTAGE : [0xEDE5, -1, 1, "", "Auto equalise stop on voltage"],
+    #     REG_EQUALISATION_CURRENT_LEVEL : [0xEDE4, 1, 1, "%", "Equalisation current level"],
+    #     REG_EQUALISATION_DURATION : [0xEDE3, 0.01, 2, "Hours", "Equalisation duration"],
+    #     REG_RE_BULK_VOLTAGE_OFFSET : [0xED2E, 0.01, 2, "V", "Re-bulk voltage offset"],
+    #     REG_BATTERY_LOW_TEMPERATURE_LEVEL : [0xEDE0, 0.01, 2, "°C", "Battery low temperature level"],
+    #     REG_VOLTAGE_COMPENSATION : [0xEDCA, 0.01, 2, "V", "Voltage compensation"]
+    # }
+    #
+    # PARAM_MAP = {
+    #     "BatteryFloatVoltage": ':7F6ED00',
+    #     "BatteryAbsorptionVoltage": ":7F7ED00",
+    #     "SystemTotal":":7DDED00",
+    #     "UserTotal":"7DCEDDC"
+    # }
 
     def __init__(self, serialport, timeout, debug = False, sim = False):
         self.sim = sim
         self.debug = debug
-        if not sim:
+        if sim:
+            self.ve = Mpptsim()
+        else:
             self.ve = Vedirect(serialport, timeout, debug)
 
     def read_text_frame(self):
-        if self.sim:
-            # This data dump from a Smartsolar MPPT 100|50
-            raw_res = {'PID': '0xA057', 'FW': '154', 'SER#': 'HQ18295PH3P',
-                          'V': '22680', 'I': '23400', 'VPV': '61970', 'PPV': '541',
-                          'CS': '3', 'MPPT': '2', 'OR': '0x00000000', 'ERR': '0',
-                          'LOAD': 'ON', 'H19': '18405', 'H20': '221', 'H21': '961',
-                          'H22': '507', 'H23': '958', 'HSDS': '248'}
-        else:
-            raw_res = self.ve.read_text_frame()
-        return self.text_translate(raw_res)
+        return self.text_translate(self.ve.read_text_frame())
 
     def ping_device(self):
         raw_result = self.ve.send_command("1")
@@ -44,10 +91,12 @@ class Smartsolar:
         return version
 
     def get_param(self, param):
-        cmd_str = self.PARAM_MAP[param]
+        if not param in Veconst.REG_PARAMS.keys():
+            return ("Param not found!")
+        cmd_str = "7{:02X}{:02X}00".format(param & 0xFF, (int(param/256)) & 0xFF)
         raw_result = self.ve.send_command(cmd_str) #rtn ":7F7ED009C09C5"
 
-        if raw_result[0:len(cmd_str)]!=cmd_str:
+        if raw_result[1:len(cmd_str)]!=cmd_str:
             print("Maybe async--------")
             raw_result = self.ve.send_command(cmd_str)
         result = raw_result[len(cmd_str)+1:len(raw_result)-2] # 9C09
