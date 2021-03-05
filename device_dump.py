@@ -8,6 +8,8 @@ from vedirect import Vedirect
 # ve = Mpptsim()
 ve = Vedirect('/dev/tty.usbserial-VE4ZKFJZ',60, False)
 
+print(ve.read_text_frame())
+print ("========Below is command response ========")
 for i in [1,3,4]:
     f,v = ve.send_command(":"+str(i))
     if f:
