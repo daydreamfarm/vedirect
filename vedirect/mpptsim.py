@@ -12,6 +12,8 @@ class Mpptsim:
             return (True,":15441BF")
         if cmd[1]=='7':
             i = Vecommon.little_endian_to_int(cmd[2:6])
+            if not i in Veconst.REG_PARAMS.keys():
+                return (False, "Param Not Exists!")
             reg = Veconst.REG_PARAMS[i]
             if reg[5][7:8]=='1':
                 return (False, "Unknown ID")

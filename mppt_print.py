@@ -16,7 +16,7 @@ if __name__ == '__main__':
     parser.add_argument('--timeout', help='Serial port read timeout', type=int, default='60')
     args = parser.parse_args()
 
-    ss = Smartsolar('/dev/tty.usbserial-VE4ZKFJZ', 60, debug = True, sim = True)
+    ss = Smartsolar('/dev/tty.usbserial-VE4ZKFJZ', 60, debug = False, sim = True)
     # t =(ss.read_text_frame())
     # ss.human_dump(t)
     # print(ss.ping_device())
@@ -24,8 +24,8 @@ if __name__ == '__main__':
 
     # print("Get Param = ", ss.get_param(Veconst.REG_BATTERY_LOW_TEMPERATURE_LEVEL))
 
-    # for p in Veconst.REG_PARAMS.keys():
-    #     f,res = ss.get_param(p)
-    #     print("Get Param = ", f, res)
+    for p in Veconst.REG_PARAMS.keys():
+        f,res = ss.get_param(p)
+        print("Get Param = ", f, res)
 
     print(ss.get_param(0x010A))

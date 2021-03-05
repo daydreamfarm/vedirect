@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 class Veconst:
+    (TYPE_UN8, TYPE_UN16, TYPE_UN32, TYPE_SN16, TYPE_STRING) = range(5)
+
     REG_BATTERYSAFE_MODE = 0xEDFF         # Removed since 1.13
     REG_ADAPTIVE_MODE = 0xEDFE
     REG_AUTOMATIC_EQUALISATION_MODE = 0xEDFD
@@ -26,9 +28,12 @@ class Veconst:
 
     REG_SERIAL_NUMBER = 0x010A
 
-    # param_name : [ ID, Scale, Data Lengh, Unit, Description]
+    # param_name : [ ID, Scale, Data Lengh, Unit, Description, Mock Data]
+
+    (IDX_ID, IDX_SCALE, IDX_DATA_TYPE, IDX_UNIT, IDX_DESC, IDX_MOCK_DATA) = range(6)
+
     REG_PARAMS = {
-        REG_SERIAL_NUMBER : [0x010A, -1, -1, "", "Serial Number", ":70A01004851313832393550483350000000000086"],
+        REG_SERIAL_NUMBER : [0x010A, -1, TYPE_STRING, "", "Serial Number", ":70A01004851313832393550483350000000000086"],
 
         REG_BATTERYSAFE_MODE :[0xEDFF, -1, 1, "","Batterysafe mode", ":7FFED0161"],
         REG_ADAPTIVE_MODE : [0xEDFE, -1, 1, "", "Adaptive mode", ":7FEED000162"],
