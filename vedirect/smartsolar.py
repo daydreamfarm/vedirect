@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from vedirect import Vecommon
 from vedirect import Veconst
 from vedirect import Vedirect
 from vedirect import Mpptsim
@@ -101,11 +102,12 @@ class Smartsolar:
             return (flag, raw_result)
 
         result = raw_result[len(cmd_str):len(raw_result)-2] # 9C09
-        ba = bytearray.fromhex(result) #b'\x9c\t'
-        ba.reverse()
-        val = 0        # final result 0x099C = 2460
-        for b in ba:
-            val = val * 256 + b
+        val = Vecommon.little_endian_to_int(result)
+        # ba = bytearray.fromhex(result) #b'\x9c\t'
+        # ba.reverse()
+        # val = 0        # final result 0x099C = 2460
+        # for b in ba:
+        #     val = val * 256 + b
 
         reg_param = Veconst.REG_PARAMS[param]
         if reg_param[1] > 0:

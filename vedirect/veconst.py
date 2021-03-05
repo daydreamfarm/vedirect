@@ -45,10 +45,10 @@ class Veconst:
         REG_LOW_TEMPERATURE_CHARGE_CURRENT : [0xEDE6, 0.1, 2, "A", "Low temperature charge current", ":7E6ED00FFFF7D"],
         REG_AUTO_EQUALISE_STOP_ON_VOLTAGE : [0xEDE5, -1, 1, "", "Auto equalise stop on voltage", ":7E5ED00017B"],
         REG_EQUALISATION_CURRENT_LEVEL : [0xEDE4, 1, 1, "%", "Equalisation current level", ":7E4ED000875"],
-        REG_EQUALISATION_DURATION : [0xEDE3, 0.01, 2, "Hours", "Equalisation duration", ":ABBED00CD1BBB"],
-        REG_RE_BULK_VOLTAGE_OFFSET : [0xED2E, 0.01, 2, "V", "Re-bulk voltage offset", ":ABDED0012008F"],
-        REG_BATTERY_LOW_TEMPERATURE_LEVEL : [0xEDE0, 0.01, 2, "°C", "Battery low temperature level", ":72EED0014001F"],
-        REG_VOLTAGE_COMPENSATION : [0xEDCA, 0.01, 2, "V", "Voltage compensation", ":7E0ED00F4018C"]
+        REG_EQUALISATION_DURATION : [0xEDE3, 0.01, 2, "Hours", "Equalisation duration", ":7E3ED0064001A"],
+        REG_RE_BULK_VOLTAGE_OFFSET : [0xED2E, 0.01, 2, "V", "Re-bulk voltage offset", ":72EED0014001F"],
+        REG_BATTERY_LOW_TEMPERATURE_LEVEL : [0xEDE0, 0.01, 2, "°C", "Battery low temperature level", ":7E0ED00F4018C"],
+        REG_VOLTAGE_COMPENSATION : [0xEDCA, 0.01, 2, "V", "Voltage compensation", ":7CAED0196"]
     }
 
     PARAM_MAP = {

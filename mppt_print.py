@@ -16,7 +16,7 @@ if __name__ == '__main__':
     parser.add_argument('--timeout', help='Serial port read timeout', type=int, default='60')
     args = parser.parse_args()
 
-    ss = Smartsolar('/dev/tty.usbserial-VE4ZKFJZ', 60, debug = True, sim = False)
+    ss = Smartsolar('/dev/tty.usbserial-VE4ZKFJZ', 60, debug = True, sim = True)
     # t =(ss.read_text_frame())
     # ss.human_dump(t)
     # print(ss.ping_device())
