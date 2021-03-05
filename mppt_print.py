@@ -17,9 +17,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     ss = Smartsolar('/dev/tty.usbserial-VE4ZKFJZ', 60, debug = True, sim = False)
-    t =(ss.read_text_frame())
-    ss.human_dump(t)
+    # t =(ss.read_text_frame())
+    # ss.human_dump(t)
     # print(ss.ping_device())
     # print("app version", ss.get_app_version())
 
-    print("SystemTotal", ss.get_param(Veconst.REG_BATTERY_ABSORPTION_VOLTAGE))
+    # print("Get Param = ", ss.get_param(Veconst.REG_BATTERY_LOW_TEMPERATURE_LEVEL))
+
+    for p in Veconst.REG_PARAMS.keys():
+        f,res = ss.get_param(p)
+        print("Get Param = ", f, res)

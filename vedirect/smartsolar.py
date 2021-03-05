@@ -78,11 +78,11 @@ class Smartsolar:
         return self.text_translate(self.ve.read_text_frame())
 
     def ping_device(self):
-        raw_result = self.ve.send_command("1")
+        flag,raw_result = self.ve.send_command("1")
         return self.resp_done_decode(raw_result)
 
     def get_app_version(self):
-        raw_result = self.ve.send_command("3")
+        flag,raw_result = self.ve.send_command("3")
         return self.resp_done_decode(raw_result)
 
     def resp_done_decode(self, raw_result):
@@ -93,19 +93,24 @@ class Smartsolar:
     def get_param(self, param):
         if not param in Veconst.REG_PARAMS.keys():
             return ("Param not found!")
-        cmd_str = "7{:02X}{:02X}00".format(param & 0xFF, (int(param/256)) & 0xFF)
-        raw_result = self.ve.send_command(cmd_str) #rtn ":7F7ED009C09C5"
+        cmd_str = ":7{:02X}{:02X}00".format(param & 0xFF, (int(param/256)) & 0xFF)
 
-        if raw_result[1:len(cmd_str)]!=cmd_str:
-            print("Maybe async--------")
-            raw_result = self.ve.send_command(cmd_str)
-        result = raw_result[len(cmd_str)+1:len(raw_result)-2] # 9C09
+        flag,raw_result = self.ve.send_command(cmd_str) #rtn ":7F7ED009C09C5"
+
+        if not flag:
+            return (flag, raw_result)
+
+        result = raw_result[len(cmd_str):len(raw_result)-2] # 9C09
         ba = bytearray.fromhex(result) #b'\x9c\t'
         ba.reverse()
         val = 0        # final result 0x099C = 2460
         for b in ba:
             val = val * 256 + b
-        return (val / 100.0, "V", param)
+
+        reg_param = Veconst.REG_PARAMS[param]
+        if reg_param[1] > 0:
+            val = val * reg_param[1]
+        return (True,(val, reg_param[3], reg_param[4]))
 
 
     VEDIRECT_MAPPING = {

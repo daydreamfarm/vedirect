@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 class Veconst:
-    REG_BATTERYSAFE_MODE = 0xEDFF
+    REG_BATTERYSAFE_MODE = 0xEDFF         # Removed since 1.13
     REG_ADAPTIVE_MODE = 0xEDFE
     REG_AUTOMATIC_EQUALISATION_MODE = 0xEDFD
     REG_BATTERY_BULK_TIME_LIMIT = 0xEDFC
@@ -26,29 +26,29 @@ class Veconst:
 
     # param_name : [ ID, Scale, Data Lengh, Unit, Description]
     REG_PARAMS = {
-        REG_BATTERYSAFE_MODE :[0xEDFF, -1, 1, "","Batterysafe mode"],
-        REG_ADAPTIVE_MODE : [0xEDFE, -1, 1, "", "Adaptive mode"],
-        REG_AUTOMATIC_EQUALISATION_MODE : [0xEDFD, -1, 1, "", "Automatic equalisation mode"],
-        REG_BATTERY_BULK_TIME_LIMIT : [0xEDFC, 0.01, 2, "Hours", "Battery bulk time limit"],
-        REG_BATTERY_ABSORPTION_TIME_LIMIT : [0xEDFB, 0.01, 2, "Hours", "Battery absorption time limit"],
-        REG_BATTERY_ABSORPTION_VOLTAGE : [0xEDF7, 0.01, 2, "V", "Battery absorption voltage"],
-        REG_BATTERY_FLOAT_VOLTAGE : [0xEDF6, 0.01, 2, "V", "Battery float voltage"],
-        REG_BATTERY_EQUALISATION_VOLTAGE : [0xEDF4, 0.01, 2, "V", "Battery equalisation voltage"],
-        REG_BATTERY_TEMP_COMPENSATION : [0xEDF2, 0.01, 2, "mV/K", "Battery temp. compensation"],
-        REG_BATTERY_TYPE : [0xEDF1, -1, 1, "", "Battery type"],
-        REG_BATTERY_MAXIMUM_CURRENT : [0xEDF0, 0.1, 2, "A", "Battery maximum current"],
-        REG_BATTERY_VOLTAGE : [0xEDEF, 1, 1, "V", "Battery voltage"],
-        REG_BATTERY_TEMPERATURE : [0xEDEC, 0.01, 2, "K", "Battery temperature"],
-        REG_BATTERY_VOLTAGE_SETTING : [0xEDEA, 1, 1, "V", "Battery voltage setting"],
-        REG_BMS_PRESENT : [0xEDE8, -1, 1, "", "BMS present"],
-        REG_TAIL_CURRENT : [0xEDE7, 0.1, 2, "A", "Tail current"],
-        REG_LOW_TEMPERATURE_CHARGE_CURRENT : [0xEDE6, 0.1, 2, "A", "Low temperature charge current"],
-        REG_AUTO_EQUALISE_STOP_ON_VOLTAGE : [0xEDE5, -1, 1, "", "Auto equalise stop on voltage"],
-        REG_EQUALISATION_CURRENT_LEVEL : [0xEDE4, 1, 1, "%", "Equalisation current level"],
-        REG_EQUALISATION_DURATION : [0xEDE3, 0.01, 2, "Hours", "Equalisation duration"],
-        REG_RE_BULK_VOLTAGE_OFFSET : [0xED2E, 0.01, 2, "V", "Re-bulk voltage offset"],
-        REG_BATTERY_LOW_TEMPERATURE_LEVEL : [0xEDE0, 0.01, 2, "°C", "Battery low temperature level"],
-        REG_VOLTAGE_COMPENSATION : [0xEDCA, 0.01, 2, "V", "Voltage compensation"]
+        REG_BATTERYSAFE_MODE :[0xEDFF, -1, 1, "","Batterysafe mode", ":7FFED0161"],
+        REG_ADAPTIVE_MODE : [0xEDFE, -1, 1, "", "Adaptive mode", ":7FEED000162"],
+        REG_AUTOMATIC_EQUALISATION_MODE : [0xEDFD, -1, 1, "", "Automatic equalisation mode", ":7FDED000064"],
+        REG_BATTERY_BULK_TIME_LIMIT : [0xEDFC, 0.01, 2, "Hours", "Battery bulk time limit", ":7FCED0164"],
+        REG_BATTERY_ABSORPTION_TIME_LIMIT : [0xEDFB, 0.01, 2, "Hours", "Battery absorption time limit", ":7FBED0058020C"],
+        REG_BATTERY_ABSORPTION_VOLTAGE : [0xEDF7, 0.01, 2, "V", "Battery absorption voltage", ":7F7ED009C09C5"],
+        REG_BATTERY_FLOAT_VOLTAGE : [0xEDF6, 0.01, 2, "V", "Battery float voltage", ":7F6ED00600902"],
+        REG_BATTERY_EQUALISATION_VOLTAGE : [0xEDF4, 0.01, 2, "V", "Battery equalisation voltage", ":7F4ED00210B41"],
+        REG_BATTERY_TEMP_COMPENSATION : [0xEDF2, 0.01, 2, "mV/K", "Battery temp. compensation", ":7F2ED0058F324"],
+        REG_BATTERY_TYPE : [0xEDF1, -1, 1, "", "Battery type", ":7F1ED00FF71"],
+        REG_BATTERY_MAXIMUM_CURRENT : [0xEDF0, 0.1, 2, "A", "Battery maximum current", ":7F0ED00F4017C"],
+        REG_BATTERY_VOLTAGE : [0xEDEF, 1, 1, "V", "Battery voltage", ":7EFED00185A"],
+        REG_BATTERY_TEMPERATURE : [0xEDEC, 0.01, 2, "K", "Battery temperature", ":7ECED00FFFF77"],
+        REG_BATTERY_VOLTAGE_SETTING : [0xEDEA, 1, 1, "V", "Battery voltage setting", ":7EAED00185F"],
+        REG_BMS_PRESENT : [0xEDE8, -1, 1, "", "BMS present", ":7E8ED000079"],
+        REG_TAIL_CURRENT : [0xEDE7, 0.1, 2, "A", "Tail current", ":7E7ED00320048"],
+        REG_LOW_TEMPERATURE_CHARGE_CURRENT : [0xEDE6, 0.1, 2, "A", "Low temperature charge current", ":7E6ED00FFFF7D"],
+        REG_AUTO_EQUALISE_STOP_ON_VOLTAGE : [0xEDE5, -1, 1, "", "Auto equalise stop on voltage", ":7E5ED00017B"],
+        REG_EQUALISATION_CURRENT_LEVEL : [0xEDE4, 1, 1, "%", "Equalisation current level", ":7E4ED000875"],
+        REG_EQUALISATION_DURATION : [0xEDE3, 0.01, 2, "Hours", "Equalisation duration", ":ABBED00CD1BBB"],
+        REG_RE_BULK_VOLTAGE_OFFSET : [0xED2E, 0.01, 2, "V", "Re-bulk voltage offset", ":ABDED0012008F"],
+        REG_BATTERY_LOW_TEMPERATURE_LEVEL : [0xEDE0, 0.01, 2, "°C", "Battery low temperature level", ":72EED0014001F"],
+        REG_VOLTAGE_COMPENSATION : [0xEDCA, 0.01, 2, "V", "Voltage compensation", ":7E0ED00F4018C"]
     }
 
     PARAM_MAP = {

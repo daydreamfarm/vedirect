@@ -59,15 +59,18 @@ class Vedirect:
     # Please refer for BlueSolar-HEX-protocol-MPPT.pdf for detailed info.
     def send_command(self, cmd):
         hex_command = self.gen_hex_command(cmd)
-        for i in range(10):
-            self.dump_int_array(hex_command, "Command")
-            self.ser.write(hex_command)
+        self.dump_int_array(hex_command, "Command")
+        self.ser.write(hex_command)
+        for i in range(10): # Retry to get a hex response
             raw_res = self.read_frame(self.FRAME_HEX)
-            if raw_res and raw_res[0]==chr(self.hexmarker) and self.hex_checksum(raw_res) == 0:
-                self.err_msg = ""
-                return raw_res
-        self.err_msg = "No valid response!"
-        return False
+            if (isinstance(raw_res,str)     # Text frame will be object
+                    and raw_res[0]==chr(self.hexmarker)  # Must lead with colon
+                    and self.hex_checksum(raw_res) == 0
+                    and raw_res[1]!='A'):   # Skip async frame
+                if raw_res[7:8]=='1':
+                    return (False, "Unknown ID")
+                return (True, raw_res)
+        return (False, "No valid response!")
 
         # todo return value checksum veirfication
         # 所有返回的命令必须跟发出的命令匹配才有意义，否则就是错的
@@ -188,7 +191,7 @@ class Vedirect:
     # e.g. gen_hex_command("7F7ED00")
     # return ":7F7ED006A" in ASCII int array
     def gen_hex_command(self, cmd):
-        hex_command = [self.hexmarker]
+        hex_command = []
         for c in cmd:
             hex_command.append(ord(c))
 
