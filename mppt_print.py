@@ -24,6 +24,8 @@ if __name__ == '__main__':
 
     # print("Get Param = ", ss.get_param(Veconst.REG_BATTERY_LOW_TEMPERATURE_LEVEL))
 
-    for p in Veconst.REG_PARAMS.keys():
-        f,res = ss.get_param(p)
-        print("Get Param = ", f, res)
+    # for p in Veconst.REG_PARAMS.keys():
+    #     f,res = ss.get_param(p)
+    #     print("Get Param = ", f, res)
+
+    print(ss.get_param(0x010A))

@@ -26,8 +26,8 @@ class Mpptsim:
                       'LOAD': 'ON', 'H19': '18405', 'H20': '221', 'H21': '961',
                       'H22': '507', 'H23': '958', 'HSDS': '248'}
 
-    def __init__(self):
-        self.debug = True
+    def __init__(self, debug = False):
+        self.debug = debug
         self.header1 = ord('\r') #0x0D
         self.header2 = ord('\n') #0x0A
         self.hexmarker = ord(':') #0x3A

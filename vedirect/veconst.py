@@ -24,8 +24,12 @@ class Veconst:
     REG_BATTERY_LOW_TEMPERATURE_LEVEL = 0xEDE0
     REG_VOLTAGE_COMPENSATION = 0xEDCA
 
+    REG_SERIAL_NUMBER = 0x010A
+
     # param_name : [ ID, Scale, Data Lengh, Unit, Description]
     REG_PARAMS = {
+        REG_SERIAL_NUMBER : [0x010A, -1, -1, "", "Serial Number", ":70A01004851313832393550483350000000000086"],
+
         REG_BATTERYSAFE_MODE :[0xEDFF, -1, 1, "","Batterysafe mode", ":7FFED0161"],
         REG_ADAPTIVE_MODE : [0xEDFE, -1, 1, "", "Adaptive mode", ":7FEED000162"],
         REG_AUTOMATIC_EQUALISATION_MODE : [0xEDFD, -1, 1, "", "Automatic equalisation mode", ":7FDED000064"],
